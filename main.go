@@ -15,6 +15,49 @@ type Users struct {
 	Email    string `json:"email"`
 }
 
+
+func main() {
+	// Create a client
+	client, err := elastic.NewClient()
+	if err != nil {
+		// Handle error
+		panic(err)
+	}
+
+	defer client.Stop()
+
+	ctx := context.Background()
+
+	query := elastic.NewTermQuery("email", "fourth@gmail.com")
+	get1, err := client.Search().
+		Index("users").
+		Query(query).
+		Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, hit := range get1.Hits.Hits {
+		var u Users
+		err = json.Unmarshal(hit.Source, &u)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf(u.User, u.Email, u.Password)
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //const (
 //	host     = "localhost"
@@ -93,34 +136,3 @@ type Users struct {
 //		return
 //	} // () --- listen and serve on 0.0.0.0:8080- default
 //}
-
-func main() {
-	// Create a client
-	client, err := elastic.NewClient()
-	if err != nil {
-		// Handle error
-		panic(err)
-	}
-
-	defer client.Stop()
-
-	ctx := context.Background()
-
-	query := elastic.NewTermQuery("email", "fourth@gmail.com")
-	get1, err := client.Search().
-		Index("users").
-		Query(query).
-		Do(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, hit := range get1.Hits.Hits {
-		var u Users
-		err = json.Unmarshal(hit.Source, &u)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf(u.User, u.Email, u.Password)
-	}
-}
